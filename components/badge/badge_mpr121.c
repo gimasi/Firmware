@@ -39,7 +39,6 @@
 #define MPR121_CONFIG1      0x5C
 #define MPR121_CONFIG2      0x5D
 
-
 // mutex for accessing badge_mpr121_state, badge_mpr121_handlers, etc..
 xSemaphoreHandle badge_mpr121_mux = NULL;
 
