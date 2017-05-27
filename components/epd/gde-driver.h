@@ -9,12 +9,19 @@
 
 #define DISP_SIZE_X_B ((DISP_SIZE_X + 7) >> 3)
 
-#define LUT_DEFAULT 0
-#define LUT_FULL 0
-#define LUT_PART 1
-#define LUT_FASTER 2
+// full display update, including writing inverse image
+#define LUT_FULL    0
+// display update without writing inverse image
+#define LUT_PART    1
+// display update without writing inverse image
+#define LUT_FASTER  2
+// display update without writing inverse image
 #define LUT_FASTEST 3
-#define LUT_MAX 3
+
+#define LUT_MAX     3
+
+#define LUT_DEFAULT LUT_FULL
+
 extern void initDisplay(void);
 extern void writeLUT(int lut_idx);
 
