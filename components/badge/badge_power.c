@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <driver/adc.h>
+
 #include "sdkconfig.h"
 
 #include "badge_pins.h"
@@ -11,19 +13,29 @@
 #include "badge_mpr121.h"
 #include "badge_power.h"
 
+#ifdef ADC1_CHAN_VBAT_SENSE
 int
 badge_battery_volt_sense(void)
 {
-	// FIXME
-	return -1;
-}
+	int val = adc1_get_voltage(ADC1_CHAN_VBAT_SENSE);
+	if (val == -1)
+		return -1;
 
+	return (val * 220 * 32) >> 12;
+}
+#endif // ADC1_CHAN_VBAT_SENSE
+
+#ifdef ADC1_CHAN_VUSB_SENSE
 int
 badge_usb_volt_sense(void)
 {
-	// FIXME
-	return -1;
+	int val = adc1_get_voltage(ADC1_CHAN_VUSB_SENSE);
+	if (val == -1)
+		return -1;
+
+	return (val * 220 * 32) >> 12;
 }
+#endif // ADC1_CHAN_VUSB_SENSE
 
 #if defined(PORTEXP_PIN_NUM_CHRGSTAT) || defined(MPR121_PIN_NUM_CHRGSTAT)
 bool
@@ -40,11 +52,24 @@ badge_battery_charge_status(void)
 void
 badge_power_init(void)
 {
+	// configure adc width
+#if defined(ADC1_CHAN_VBAT_SENSE) || defined(ADC1_CHAN_VUSB_SENSE)
+	adc1_config_width(ADC_WIDTH_12Bit);
+#endif // defined(ADC1_CHAN_VBAT_SENSE) || defined(ADC1_CHAN_VUSB_SENSE)
+
 	// configure vbat-sense
-	// FIXME
+#ifdef ADC1_CHAN_VBAT_SENSE
+	// When VDD_A is 3.3V:
+	// 6dB attenuation (ADC_ATTEN_6db) gives full-scale voltage 2.2V
+	adc1_config_channel_atten(ADC1_CHAN_VBAT_SENSE, ADC_ATTEN_6db);
+#endif // ADC1_CHAN_VBAT_SENSE
 
 	// configure vusb-sense
-	// FIXME
+#ifdef ADC1_CHAN_VUSB_SENSE
+	// When VDD_A is 3.3V:
+	// 6dB attenuation (ADC_ATTEN_6db) gives full-scale voltage 2.2V
+	adc1_config_channel_atten(ADC1_CHAN_VUSB_SENSE, ADC_ATTEN_6db);
+#endif // ADC1_CHAN_VUSB_SENSE
 
 	// configure charge-stat pin
 #ifdef PORTEXP_PIN_NUM_CHRGSTAT
