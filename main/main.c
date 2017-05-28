@@ -19,6 +19,8 @@
 #include "badge_leds.h"
 #include "badge_eink.h"
 #include "badge_buzzer.h"
+#include "badge_power.h"
+#include "badge_sdcard.h"
 
 #include "imgv2_sha.h"
 #include "imgv2_menu.h"
@@ -135,6 +137,7 @@ struct menu_item {
 #include "demo_leds.h"
 #include "demo_ugfx.h"
 #include "demo_buzzer.h"
+#include "demo_power.h"
 
 const struct menu_item demoMenu[] = {
     {"text demo 1", &demoText1},
@@ -161,6 +164,7 @@ const struct menu_item demoMenu[] = {
 #endif // PIN_NUM_LEDS
     {"uGFX demo", &demoUgfx},
     {"buzzer demo", &demoBuzzer},
+    {"charging demo", &demoPower},
     {"tetris?", NULL},
     {"something else", NULL},
     {"test, test, test", NULL},
@@ -297,10 +301,12 @@ void
 app_main(void) {
 	nvs_flash_init();
 
+	/* initialize device */
 	// install isr-service, so we can register interrupt-handlers per
 	// gpio pin.
 	gpio_install_isr_service(0);
 
+	// FIXME: move button handling to badge_buttons.c ?
 	/* configure buttons input */
 	evt_queue = xQueueCreate(10, sizeof(uint32_t));
 #ifdef PIN_NUM_BUTTON_A
@@ -361,30 +367,39 @@ app_main(void) {
 	badge_touch_set_event_handler(touch_event_handler);
 #endif // I2C_TOUCHPAD_ADDR
 
+	badge_power_init();
+
 #ifdef PIN_NUM_LEDS
 	badge_leds_init();
 #endif // PIN_NUM_LEDS
 
-  tcpip_adapter_init();
-  ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
-
-#ifdef CONFIG_WIFI_USE
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-  ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-  wifi_config_t sta_config = {
-      .sta = {.ssid = CONFIG_WIFI_SSID, .password = CONFIG_WIFI_PASSWORD, .bssid_set = false}};
-  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));
-  ESP_ERROR_CHECK(esp_wifi_start());
-  ESP_ERROR_CHECK(esp_wifi_connect());
-#endif // CONFIG_WIFI_USE
-
 #if defined(PORTEXP_PIN_NUM_BUZZER) || defined(MPR121_PIN_NUM_BUZZER)
-  badge_buzzer_init();
+	badge_buzzer_init();
 #endif // defined(PORTEXP_PIN_NUM_BUZZER) || defined(MPR121_PIN_NUM_BUZZER)
 
-  badge_eink_init();
+	badge_sdcard_init();
+
+	badge_eink_init();
+
+#ifdef CONFIG_WIFI_USE
+	tcpip_adapter_init();
+	ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+	ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+	wifi_config_t sta_config = {
+		.sta = {
+			.ssid      = CONFIG_WIFI_SSID,
+			.password  = CONFIG_WIFI_PASSWORD,
+			.bssid_set = false
+		},
+	};
+	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));
+	ESP_ERROR_CHECK(esp_wifi_start());
+	ESP_ERROR_CHECK(esp_wifi_connect());
+#endif // CONFIG_WIFI_USE
 
   int picture_id = 0;
 #if 0
