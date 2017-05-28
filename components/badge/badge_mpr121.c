@@ -300,6 +300,8 @@ badge_mpr121_get_gpio_level(int pin)
 	if (pin < 4 || pin >= 12)
 		return -1;
 
+	pin -= 4;
+
 	// read data
 	int res = badge_mpr121_read_reg(0x75);
 	if (res == -1)
