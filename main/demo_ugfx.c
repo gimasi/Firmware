@@ -36,7 +36,7 @@ void showDemo(uint8_t name, color_t front, color_t back) {
                 127 + 3 + gdispGetStringWidth(displayNames[name], permanentMarker) + 10, 50 + 22 - 2,
                 front);
   gdispDrawString(140, 75, "Anyway", robotoBlackItalic, front);
-  gdispDrawCircle(60, 60, 50, front);
+
   gdispFlush();
 }
 
@@ -59,9 +59,7 @@ void demoUgfx() {
       showDemo(i, Black, White);
       ets_delay_us(5000000);
 
-      ets_printf("Paint it Black\n");
-      showDemo(i, White, Black);
-      ets_delay_us(5000000);
+      
     }
   }
 }

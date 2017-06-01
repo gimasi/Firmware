@@ -131,9 +131,15 @@ struct menu_item {
 #include "demo_test_adc.h"
 #include "demo_leds.h"
 #include "demo_ugfx.h"
+#include "sebastius.h"
 
 const struct menu_item demoMenu[] = {
-    {"text demo 1", &demoText1},
+{"Sebastius tag", &sebastius},
+	  {"uGFX demo", &demoUgfx},
+		#ifdef PIN_NUM_LEDS
+				{"LEDs demo", &demo_leds},
+		#endif // PIN_NUM_LEDS
+		{"text demo 1", &demoText1},
     {"text demo 2", &demoText2},
 #ifdef CONFIG_SHA_BADGE_EINK_GDEH029A1
     {"greyscale 1", &demoGreyscale1},
@@ -148,16 +154,7 @@ const struct menu_item demoMenu[] = {
     {"dot 1", &demoDot1},
 #endif // CONFIG_SHA_BADGE_EINK_GDEH029A1
     {"ADC test", &demoTestAdc},
-#ifdef PIN_NUM_LEDS
-    {"LEDs demo", &demo_leds},
-#endif // PIN_NUM_LEDS
-    {"uGFX demo", &demoUgfx},
-    {"tetris?", NULL},
-    {"something else", NULL},
-    {"test, test, test", NULL},
-    {"another item..", NULL},
-    {"dot 2", NULL},
-    {"dot 3", NULL},
+
     {NULL, NULL},
 };
 
